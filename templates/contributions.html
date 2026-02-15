@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set page = "contributions" %}
+
+{% block title %}Your Contributions{% endblock %}
+
+{% block content %}
+  <div class="panel">
+    <div class="file-picker" id="contributionsPicker">
+		Select JSON file with contributions
+    </div>
+</div>
+
+<div class="container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/contributions.js" type="module"></script>
+{% endblock %}

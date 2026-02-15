@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% set page = "userscript" %}
+
+{% block title %}Usercript{% endblock %}
+
+{% block content %}
+<section> 
+	<h1>E-Fatura Control Panel <span class="code">Userscript</span></h1>
+	<hr>	
+	<p> 
+		The <strong>Userscript</strong> is the core of this project’s automation. It runs directly on the official <strong>e-Fatura website</strong> and is responsible for: 
+	</p> 
+	<ul> 
+		<li>Scraping invoice data</li> 
+		<li>Intercepting and enhancing the submission flow</li> 
+		<li>Applying auto-fill logic in real time</li>
+		<li>Saving decisions into a persistent cache</li> 
+	</ul> 
+	<div class="info-box">
+		<strong>The Userscript and Web App are intentionally separate.</strong> 
+		The <span class="code">Userscript</span> collects data. 
+				<br>			<br>		
+		
+		The <span class="code">Manager</span> manages, analyzes, and merges it. 
+		<br>
+	</div>
+	<hr>
+	<h2>Key Features</h2>
+	<ul>
+		<li><strong>Automatic sector selection</strong> – fills in sectors for invoices based on your cached preferences.</li> 
+		<li><strong>Conditional emitter logic</strong> – if an invoice emitter is marked <em>conditional</em>, the script avoids pre-defined sectors. It uses the invoice’s tax rate to filter out sectors that may conflict with legal limits or common sense, selecting the most profitable remaining option. More info on that <a href="/info">here</a>.</li>
+		<li><strong>Alias support</strong> – lets you rename emitters so you can identify companies more easily; often the invoice name differs from the shop/brand.</li> 
+		<li><strong>Reimbursement-aware auto-fill</strong> – respects reimbursement limits and IVA rules.</li>
+		<li><strong>Immediate cache persistence</strong> – changes are saved locally for instant recall.</li> 
+		<li><strong>JSON export for long-term storage</strong> – save or restore session data for backup or sharing.</li>
+	</ul> 
+	<hr>
+	<h2>💾 Install Userscript</h2> 
+	<p> 
+		👉 <a href="https://update.greasyfork.org/scripts/566397/E-Fatura%20Control%20Panel.user.js" class="download-button" download>Install E-Fatura Userscript</a><br> <em>(Tampermonkey / Violentmonkey compatible)</em> 
+	</p> 
+</section> 
+
+<section>
+	<h2>Extracting Your Contributions</h2>
+	<hr>
+	<p> 
+		The Extract Contributions system is designed to normalize and enrich contribution data (mainly IVA/Tax sectors) from cached JSON or directly from the active year. It ensures all sector data is fully annotated with calculations needed for reimbursements and spending limits, creating a single source of truth. 
+	</p> 
+	<br> 
+	<h3>1. Data Extraction</h3> 
+	<p> 
+	Contribution data is loaded either from the cached configuration or by extracting active-year data. Each sector object includes all relevant properties such as total reimbursed, maximum spending limits, and tax rates. 
+	</p>
+	<br> 
+	<h3>2. Enrichment</h3> 
+	<p> 
+		Two types of enrichment are applied to ensure sector data is complete and actionable:
+	</p>
+	<br>
+	<p><strong>a. IVA-based dynamic enrichment (<span class="code">enrichIVASectors</span>)</strong></p> 
+	<ul>
+		<li>Applies reimbursement formulas from <span class="code">IVA_REIMBURSE_RULES</span>.</li> 
+		<li>
+			Computes: 
+			<ul>
+				<li><strong>ReimburseRate</strong> – based on tax and reimbursement rates</li> 
+				<li><strong>ReimburseLimit</strong> – remaining reimbursable amount for the sector</li>
+				<li><strong>MaximumEfficientSpending</strong> – spending needed to maximize reimbursement</li> 
+				<li><strong>TaxRate</strong> and <strong>Title</strong></li>
+			</ul> 
+		</li>
+		<li>Uses current reimbursement sums across all IVA sectors to calculate remaining limits.</li> 
+	</ul>
+	<br>	
+	<p><strong>b. Static metadata enrichment (<span class="code">enrichStaticSectors</span>)</strong></p> 
+	<ul> 
+		<li>Applies predefined metadata from <span class="code">SECTOR_METADATA_MAP</span>.</li> 
+		<li>
+			For sectors marked <span class="code">STATIC_SECTOR</span>:
+			<ul> 
+				<li>Pulls fixed <strong>maxReimburse</strong>, <strong>taxRate</strong>, and <strong>maxEfficientSpending</strong></li>
+				<li>Calculates <strong>ReimburseRate</strong> as <code>ReimburseLimit / MaximumEfficientSpending</code></li>
+			</ul> 
+		</li> 
+	</ul> 
+	<br>
+	<p><strong>Why two types?</strong></p> 
+	<ul> 
+		<li>Some sectors are dynamically reimbursed yearly (<span class="code">IVA_SECTOR</span>).</li>
+		<li>Others have static metadata that doesn’t change annually (<span class="code">STATIC_SECTOR</span>).</li>
+		<li>Combining both ensures all sectors are fully enriched regardless of type.</li> 
+	</ul> 
+	<br> 
+	<h3>3. Persist Enriched Data</h3> 
+	<ul> 
+		<li><span class="code">saveConfigToStorage(result.cacheKey, sectors)</span> stores the enriched sectors in localStorage or similar cache.</li>
+		<li>This provides a <strong>single source of truth</strong> for UI display, Auto-Fill, or further calculations.</li> 
+	</ul>
+	<br> 
+	<h3>4. User Feedback & Logging</h3> 
+	<ul> 
+		<li><span class="code">showSnackbar</span> confirms successful extraction.</li>
+		<li><span class="code">logWithTimestamp</span> provides detailed logging for debugging and auditing.</li> 
+	</ul> 
+	<br> 
+	<h3>5. Enrichment Feature Comparison</h3> 
+	
+	<table> 
+		<thead> 
+			<tr> <th>Feature</th> <th>enrichIVASectors</th> <th>enrichStaticSectors</th> </tr>
+		</thead> 
+		<tbody> 
+			<tr> <td>Sector type</td> <td>IVA_SECTOR</td> <td>STATIC_SECTOR</td> </tr> 
+			<tr> <td>External rules</td> <td>Yes (IVA_REIMBURSE_RULES)</td> <td>No</td> </tr>
+			<tr> <td>Shared limits</td> <td>Yes (IVA_SHARED_LIMIT)</td> <td>No</td> </tr> 
+			<tr> <td>Reimbursement computation</td> <td>Dynamic based on total reimbursement</td> <td>Static from metadata</td> </tr> 
+			<tr> <td>MaximumEfficientSpending</td> <td>Calculated dynamically</td> <td>Pulled from metadata</td> </tr> 
+			<tr> <td>ReimburseRate</td> <td>Formula using taxRate and ivaReimburseRate</td> <td>ReimburseLimit / MaximumEfficientSpending</td> </tr>
+			<tr> <td>Logging</td> <td>Yes</td> <td>Yes</td> </tr>
+		</tbody> 
+	</table> 
+</section>
+
+<section>
+	<h2>Auto-Fill Algorithm</h2>
+	<hr>	
+    <p>
+      The Auto-Fill system is designed to automatically categorize invoices in compliance with Portuguese law while optimizing for maximum reimbursement. Key principles:
+    </p>
+	<br>
+    <h3>1. Sector "DGF" – General Expenses</h3>
+    <p>
+      Every invoice is automatically reported under the <span class="code">DGF</span> sector. Specific invoices (e.g., health, magazines, restaurants, mechanics) are additionally reported in their respective sectors. <strong>DGF is always the fallback sector</strong> in the Auto-Fill algorithm.
+    </p>
+	<br>
+    <h3>2. Sector "C07" – Rent/Estate</h3>
+    <p>
+      Since landlords are legally required to register rent invoices under <span class="code">C07</span> in e-Fatura, the Auto-Fill system <strong>never attempts</strong> to classify invoices in this sector. Manual classification is allowed but automation avoids potential legal conflicts.
+    </p>
+	<br>
+	<h3>3. Sector "C05" — Health</h3>
+	<p>
+	  The Health sector <span class="code">C05</span> is subject to stricter legal requirements.
+	</p>
+	<p>
+	  Under Portuguese tax law, invoices taxed at the <strong>Normal VAT rate (23%)</strong> require a valid 
+	  <strong>medical prescription</strong> in order to be eligible for health deductions.
+	</p>
+	<div class="info-box">
+		<strong>Auto-Fill Safety Rule:</strong><br>
+		• Invoices with VAT ≤ <span class="code">Reduced Rate (6%)</span> → <strong>Eligible for automatic classification</strong><br>
+		• Invoices with VAT > <span class="code">Reduced Rate (6%)</span> → <strong>Not auto-classified</strong> (manual validation required)
+	</div>
+	<p>
+		This safeguard ensures the Auto-Fill system remains legally compliant while still optimizing 
+		reimbursement opportunities whenever safely permitted.
+	</p>
+	<br>
+    <h3>4. Tax Rate Validation</h3>
+    <p>
+      Each sector contains metadata including a <span class="code">TaxRate</span> property, representing the maximum allowed VAT rate. Auto-Fill ensures invoices are only categorized under sectors where the invoice VAT ≤ sector TaxRate, ensuring legal compliance.
+    </p>
+	<br>
+    <h3>5. Optimal Reimbursement Strategy</h3>
+    <p>
+      Auto-Fill prioritizes maximizing reimbursement. The system selects the sector providing the highest eligible return while respecting the previous constraints. Selections are stored in a local cache during the session. If the invoice issuer’s CAE (Economic Activity Code) does not allow a specific sector, Auto-Fill will recommend the next best option. Users repeat this process until a valid classification is submitted.
+    </p>
+	<hr>
+	<h3>Summary / Key Takeaways</h2>
+	<ul>
+		<li><strong>Automatic fallback:</strong> All invoices always report to DGF.</li>
+		<li><strong>Exclusions:</strong> Auto-Fill never auto-categorizes C07 invoices (real estate/rent).</li>
+		<li><strong>Legal compliance:</strong> TaxRate ensures invoices are categorized within allowed VAT limits.</li>
+		<li><strong>Maximum reimbursement:</strong> Auto-Fill aims to choose sectors maximizing returns for the taxpayer.</li>
+		<li><strong>Validation recommendation:</strong> Check invoices manually if necessary, especially for health and education.</li>
+		<li><strong>Design principle:</strong> When legal ambiguity exists, Auto-Fill defaults to conservative classification.</li>
+	</ul>
+ 	<br>
+</section>
+
+
+{% endblock %}
+
+{% block scripts %}
+<<script src="/static/base.js" type="module"></script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% set page = "merge" %}
+
+{% block title %}Merge JSON{% endblock %}
+
+{% block content %}
+<!-- <section class="merge-layout"> -->
+<div class="container">
+  <div class="panel">
+    <div class="file-picker" id="leftPicker">
+      Left file
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="file-picker" id="rightPicker">
+      Right file
+    </div>
+  </div>
+</div>
+<!-- </section> -->
+
+<div class="container-actions">
+  <button id="mergeBtn">Merge</button>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Merged Result</h3>
+    <pre><code id="result" class="language-json"></code></pre>
+
+    <div class="modal-actions">
+      <button class="cancel" id="cancelBtn">Cancel</button>
+      <button class="confirm" id="confirmBtn">Confirm & Save</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/merge.js" type="module"></script>
+{% endblock %}

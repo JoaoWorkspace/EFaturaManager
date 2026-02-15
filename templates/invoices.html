@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% set page = "invoices" %}
+
+{% block title %}Manage Invoices{% endblock %}
+
+{% block content %}
+  <div class="panel">
+	  <div class="file-picker" id="invoicePicker">
+		Select JSON file with invoices
+	  </div>
+  </div>
+  <!-- <input type="file" id="invoiceInput" accept=".json" style="display:none;"> -->
+  <div class="container-actions"></div>
+  <div class="container grid"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/invoices.js" type="module"></script>
+{% endblock %}

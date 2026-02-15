@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" href="/static/favicon.ico">
+<link rel="stylesheet" href="/static/base.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/diff-match-patch/1.0.5/diff-match-patch.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+<title>{% block title %}{% endblock %}</title>
+</head>
+
+<body class="{{ page }}-page">
+<header class="topbar">
+  <div class="brand">
+	<h1 class="menu">E-Fatura Manager</h1>
+  </div>
+
+  <nav>
+    <a href="/" class="{% if page=='index' %}active{% endif %}">Home</a>
+	<a href="/contributions" class="{% if page=='contributions' %}active{% endif %}">Contributions</a>
+	<a href="/invoices" class="{% if page=='invoices' %}active{% endif %}">Invoices</a>
+    <a href="/merge" class="{% if page=='merge' %}active{% endif %}">Merge</a>
+	<a href="/userscript" class="{% if page=='userscript' %}active{% endif %}">Userscript</a>
+  </nav>
+</header>
+
+<main>
+  {% block content %}
+  {% endblock %}
+</main>
+
+<!-- Snackbar -->
+<div id="snackbar" class="snackbar hidden"></div>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
