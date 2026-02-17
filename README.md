@@ -5,6 +5,7 @@
 It helps you **collect, cache, review, auto-fill, and merge invoice data**, turning a repetitive bureaucratic task into a guided, data-driven workflow.
 
 You can browse the application locally through:
+
 ```
 python .\app.py
 ```
